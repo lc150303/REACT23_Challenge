@@ -1,0 +1,78 @@
+model:
+  base_learning_rate: 0.0625
+
+  use_scheduler: True
+  scheduler_config:
+    params:
+      verbosity_interval: 0   # 0 or negative to disable
+      warm_up_steps: 5000
+      keep_steps: 60000
+      max_decay_steps: 150001
+      lr_start: 2.5e-6
+      lr_max: 1.5e-4
+      lr_min: 1.0e-8
+
+  transformer_config:
+    params:
+      max_n_frame: 750
+      online_step: 1
+      n_s_token: 3
+      n_l_token: 3
+      dim_s_exp: 512
+      dim_s_AU: 25088
+      dim_s_VA: 1408
+      dim_s_pose: 1408
+      dim_s_MFCC: 26
+      dim_s_GeMAPfunc: 6373
+      dim_s_GeMAPlld: 194805
+      n_l_AU: 5976
+      n_l_exp: 8000
+      n_l_VA: 2710
+      n_layer: 8
+      n_head: 12
+      dim_embed: 768
+      embd_pdrop: 0.1
+      resid_pdrop: 0.1
+      attn_pdrop: 0.1
+
+  visual_decoder_config:
+    params:
+      n_dim_3DMM: 2000
+
+  decoding_params:
+    top_k: 0
+    top_p: 0.33
+    temperature: 1
+    step: 8
+    online_step: 5
+    online_max_len: 750
+
+test_params:
+  batch_size: 2   # per GPU
+  s_gt_path: data/val_s_gt.npy  # (N, 750, 25)
+  l_gt_path: data/val_l_gt.npy  # (N, 750, 25)
+  AU_csv: data/Index/AU_index.csv
+  exp_pkl: data/Index/kmeans.pkl
+  VA_csv: data/Index/VA_index.csv
+
+train_params:
+  mode: pretrain
+  max_iter: 150001
+  total_batch_size: 16  # used for gradient accumulation
+  batch_size: 1   # per GPU
+  train_slm: True
+  max_norm: 10    # for gradient clip
+  shuffle_listener: 0.2   # portion of listener will be chosen from appropriate
+  save_interval: 2000
+  log_interval: 200
+
+paths:
+  data_root: ./data
+  training_set: train_shuffled.h5
+  test_set: test_sequential.h5
+  val_set: val_sequential.h5
+  train_appro: train_appro_shuffled.npy
+  val_appro: neighbour_emotion_val.npy    # official
+  ckpt_root: ./ckpts
+  experiment_name: pretrain-5s-randL-gp
+
